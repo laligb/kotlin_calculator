@@ -111,8 +111,6 @@ private fun CalculatorSymbols() {
         }
 
     }
-
-
 }
 
 @Composable
