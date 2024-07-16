@@ -57,6 +57,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+
 data class Calculator(var number1: Int, var number2: Int){
     fun add(): Int {
         return number1 + number2
