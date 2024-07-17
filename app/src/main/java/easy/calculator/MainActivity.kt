@@ -19,6 +19,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,8 +49,8 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(30.dp)
                     ) {
                         val calculator = Calculator(10, 2)
-                        Calculate(calculator)
-                        CalculatorSymbols()
+                        Welcome(calculator)
+                        Calculate()
 
                     }
                 }
@@ -75,7 +79,26 @@ data class Calculator(var number1: Int, var number2: Int){
 }
 
 @Composable
-private fun CalculatorSymbols() {
+private fun Calculate() {
+
+    var clickedSymbol by remember { mutableStateOf("") }
+
+    Column (
+
+    ) {
+        CalculatorSymbols {symbol ->
+            clickedSymbol = symbol
+        }
+//        Spacer(modifier = Modifier.height(16.dp))
+        PrintResult(clickedSymbol)
+    }
+
+
+
+}
+
+@Composable
+private fun CalculatorSymbols(clicked: (String) -> Unit) {
     var numbersAndSymbols = listOf(
         listOf("C", "()", "%", "/"),
         listOf("7", "8", "9", "X"),
@@ -91,7 +114,7 @@ private fun CalculatorSymbols() {
             ) {
                 symbols.forEach { symbol ->
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { clicked(symbol) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Magenta,
                             contentColor = Color.Yellow
@@ -116,7 +139,7 @@ private fun CalculatorSymbols() {
 }
 
 @Composable
-private fun Calculate(action: Calculator) {
+private fun Welcome(action: Calculator) {
 //    var addItems = action.add()
 //    var substractItems = action.substract()
 //    var multiplicateItems = action.multiplicate()
@@ -133,6 +156,16 @@ private fun Calculate(action: Calculator) {
         Text(text = "Enjoy your calculations! ")
     }
 
+}
+
+@Composable
+private fun PrintResult(numb1: String) {
+    Row (
+        modifier = Modifier.padding(30.dp),
+
+    ){
+        Text(text = "RESULT $numb1 ")
+    }
 }
 
 
