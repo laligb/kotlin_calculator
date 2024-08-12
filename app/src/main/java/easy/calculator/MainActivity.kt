@@ -1,23 +1,21 @@
 package easy.calculator
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,10 +24,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import easy.calculator.ui.theme.CalculatorTheme
+
 
 
 class MainActivity : ComponentActivity() {
@@ -48,9 +46,9 @@ class MainActivity : ComponentActivity() {
                     Column (
                         modifier = Modifier.padding(30.dp)
                     ) {
-                        val calculator = Calculator(10, 2)
-                        Welcome(calculator)
+                        Welcome()
                         Calculate()
+
 
                     }
                 }
@@ -62,46 +60,120 @@ class MainActivity : ComponentActivity() {
 }
 
 
+// Taking expression in a String and calculate the result in Double
+fun calculateExpression(expression: String): Double {
+    // Updated regex to properly handle negative numbers
+    val regex = Regex("\\d+\\.?\\d*%?|[+*/-]")
+    val tokens = regex.findAll(expression).map { it.value }.toList()
 
-data class Calculator(var number1: Int, var number2: Int){
-    fun add(): Int {
-        return number1 + number2
+    //println("TOKENS = "+ tokens)
+
+    // Convert string to real numbers and operators
+    val numbers = mutableListOf<Double>()
+    val operators = mutableListOf<Char>()
+
+
+
+    for (token in tokens) {
+        when {
+            token.endsWith("%") -> {
+                // Convert percentage to a decimal and add to numbers
+                val number = token.dropLast(1).toDouble() / 100.0
+                  numbers.add(number)
+            }
+            token.toDoubleOrNull() != null -> numbers.add(token.toDouble())
+            token in "+-*/" -> operators.add(token[0])
+
+        }
     }
-    fun substract(): Int {
-        return number1 - number2
+    println("tokens="+tokens+" numbers="+numbers+" operators="+operators)
+
+    // Evaluate the expression
+    var result = numbers[0]
+    var currentIndex = 1
+
+    for (operator in operators) {
+        val nextNumber = numbers[currentIndex]
+        result = when (operator) {
+            '+' -> result + nextNumber
+            '-' -> result - nextNumber
+            '*' -> result * nextNumber
+            '/' -> result / nextNumber
+            else -> throw IllegalArgumentException("Unknown operator: $operator")
+        }
+        currentIndex++
+        println( "tokens bla bla operator="+operator)
     }
-    fun multiplicate(): Int {
-        return number1 * number2
-    }
-    fun divide (): Int {
-        return number1 / number2
-    }
+    return result
 }
 
+
+
+// Main
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 private fun Calculate() {
 
     var clickedSymbol by remember { mutableStateOf("") }
+    var outputs by remember { mutableStateOf("")    }
+    var numbers by remember { mutableStateOf(mutableListOf<Double>()) }
+    var result by remember { mutableStateOf<Double?>(null) }
+
 
     Column (
 
     ) {
         CalculatorSymbols {symbol ->
             clickedSymbol = symbol
+            when (symbol) {
+                "<-" -> outputs = outputs.substring(0, outputs.length - 1)//outputs += getNextParenthesis(outputs)// And here if we found opened "(" then close it with ")"
+                "C" -> {
+                    outputs = "" // Clean memory
+                    }
+                "+-" -> {
+                    if (outputs.isEmpty()){
+                        outputs = "-"
+                        }
+                } // Change sign add to string in a first only
+                "=" -> {
+                   result = calculateExpression(outputs)
+                    outputs = result?.toString() ?: ""
+                } // take string and give result here write function of calculation
+                "." -> {
+                    // Check if outputs is not empty and the last character is a digit
+                    if (outputs.isNotEmpty() && outputs.last().isDigit()) {
+                        val lastNumber = outputs.takeLastWhile { it.isDigit() || it == '.' }
+                        if (!lastNumber.contains('.')) {
+                            outputs += "."
+                        }
+                    }
+                }
+                // Default case
+                else -> {
+                    // Prevent multiple consecutive operators
+                    if (symbol in "+-*/" && outputs.isNotEmpty() && outputs.last() in "+-*/") {
+                        outputs = outputs.dropLast(1)
+                    }
+
+                    outputs += symbol
+                }
+             }
+
+            //outputs = outputs  +  clickedSymbol
         }
-//        Spacer(modifier = Modifier.height(16.dp))
-        PrintResult(clickedSymbol)
+
+        PrintResult(outputs)
+
     }
 
-
-
 }
+
 
 @Composable
 private fun CalculatorSymbols(clicked: (String) -> Unit) {
     var numbersAndSymbols = listOf(
-        listOf("C", "()", "%", "/"),
-        listOf("7", "8", "9", "X"),
+        listOf("C", "<-", "%", "/"),
+        listOf("7", "8", "9", "*"),
         listOf("4", "5", "6", "-"),
         listOf("1", "2", "3", "+"),
         listOf("+-", "0", ".", "=")
@@ -129,22 +201,20 @@ private fun CalculatorSymbols(clicked: (String) -> Unit) {
                         Text(text = symbol,
                             style = MaterialTheme.typography.bodyLarge,
                             fontSize = 21.sp)
+
+
                     }
                 }
 
             }
+
         }
 
     }
 }
 
 @Composable
-private fun Welcome(action: Calculator) {
-//    var addItems = action.add()
-//    var substractItems = action.substract()
-//    var multiplicateItems = action.multiplicate()
-//    var divideItems = action.divide()
-
+private fun Welcome() {
     Column (
         modifier = Modifier
             .padding(30.dp),
@@ -155,18 +225,19 @@ private fun Welcome(action: Calculator) {
         Text(text = "Here you have simple calculator")
         Text(text = "Enjoy your calculations! ")
     }
-
 }
 
 @Composable
-private fun PrintResult(numb1: String) {
+private fun PrintResult(symbol: String) {
+
     Row (
         modifier = Modifier.padding(30.dp),
 
     ){
-        Text(text = "RESULT $numb1 ")
+        Text(text = "${symbol} ")
     }
 }
+
 
 
 
