@@ -62,52 +62,69 @@ class MainActivity : ComponentActivity() {
 
 // Taking expression in a String and calculate the result in Double
 fun calculateExpression(expression: String): Double {
-    // Updated regex to properly handle negative numbers
+    // Regex to match numbers (including percentages) and operators
     val regex = Regex("\\d+\\.?\\d*%?|[+*/-]")
     val tokens = regex.findAll(expression).map { it.value }.toList()
 
-    //println("TOKENS = "+ tokens)
-
-    // Convert string to real numbers and operators
+    // Lists to hold numbers and operators
     val numbers = mutableListOf<Double>()
     val operators = mutableListOf<Char>()
 
-
-
+    // Parse tokens into numbers and operators
     for (token in tokens) {
         when {
             token.endsWith("%") -> {
                 // Convert percentage to a decimal and add to numbers
                 val number = token.dropLast(1).toDouble() / 100.0
-                  numbers.add(number)
+                numbers.add(number)
             }
             token.toDoubleOrNull() != null -> numbers.add(token.toDouble())
             token in "+-*/" -> operators.add(token[0])
-
         }
     }
-    println("tokens="+tokens+" numbers="+numbers+" operators="+operators)
 
-    // Evaluate the expression
-    var result = numbers[0]
-    var currentIndex = 1
 
-    for (operator in operators) {
-        val nextNumber = numbers[currentIndex]
-        result = when (operator) {
-            '+' -> result + nextNumber
-            '-' -> result - nextNumber
-            '*' -> result * nextNumber
-            '/' -> result / nextNumber
-            else -> throw IllegalArgumentException("Unknown operator: $operator")
-        }
-        currentIndex++
-        println( "tokens bla bla operator="+operator)
-    }
-    return result
+
+    return evaluateExpression(numbers, operators)
 }
 
+fun evaluateExpression(numbers: List<Double>, operators: List<Char>): Double {
+    // Mutables for numbers and operators, since we'll modify them
+    val mutableNumbers = numbers.toMutableList()
+    val mutableOperators = operators.toMutableList()
 
+    // First, handle '*' and '/' operations
+    var index = 0
+    while (index < mutableOperators.size) {
+        val operator = mutableOperators[index]
+        if (operator == '*' || operator == '/') {
+            val result = when (operator) {
+                '*' -> mutableNumbers[index] * mutableNumbers[index + 1]
+                '/' -> mutableNumbers[index] / mutableNumbers[index + 1]
+                else -> throw IllegalArgumentException("Unknown operator: $operator")
+            }
+            // Replace the numbers at index and index + 1 with the result
+            mutableNumbers[index] = result
+            mutableNumbers.removeAt(index + 1)
+            // Remove the operator
+            mutableOperators.removeAt(index)
+        } else {
+            index++
+        }
+    }
+
+    // Now, handle '+' and '-' operations
+    var result = mutableNumbers[0]
+    for (i in 1 until mutableNumbers.size) {
+        result = when (mutableOperators[i - 1]) {
+            '+' -> result + mutableNumbers[i]
+            '-' -> result - mutableNumbers[i]
+            else -> throw IllegalArgumentException("Unknown operator: ${mutableOperators[i - 1]}")
+        }
+    }
+
+    return result
+}
 
 // Main
 @SuppressLint("MutableCollectionMutableState")
@@ -116,7 +133,6 @@ private fun Calculate() {
 
     var clickedSymbol by remember { mutableStateOf("") }
     var outputs by remember { mutableStateOf("")    }
-    var numbers by remember { mutableStateOf(mutableListOf<Double>()) }
     var result by remember { mutableStateOf<Double?>(null) }
 
 
@@ -130,15 +146,15 @@ private fun Calculate() {
                 "C" -> {
                     outputs = "" // Clean memory
                     }
-                "+-" -> {
-                    if (outputs.isEmpty()){
-                        outputs = "-"
-                        }
-                } // Change sign add to string in a first only
+//                "+-" -> {
+//                    if (outputs.isEmpty()){
+//                        outputs = "-"
+//                        }
+//                } // Change sign add to string in a first only
                 "=" -> {
                    result = calculateExpression(outputs)
                     outputs = result?.toString() ?: ""
-                } // take string and give result here write function of calculation
+                }
                 "." -> {
                     // Check if outputs is not empty and the last character is a digit
                     if (outputs.isNotEmpty() && outputs.last().isDigit()) {
@@ -159,11 +175,9 @@ private fun Calculate() {
                 }
              }
 
-            //outputs = outputs  +  clickedSymbol
         }
 
         PrintResult(outputs)
-
     }
 
 }
@@ -176,7 +190,7 @@ private fun CalculatorSymbols(clicked: (String) -> Unit) {
         listOf("7", "8", "9", "*"),
         listOf("4", "5", "6", "-"),
         listOf("1", "2", "3", "+"),
-        listOf("+-", "0", ".", "=")
+        listOf("", "0", ".", "=")
     )
     Column {
         numbersAndSymbols.forEach { symbols ->
