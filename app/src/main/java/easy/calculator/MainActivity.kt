@@ -210,7 +210,7 @@ private fun CalculatorSymbols(clicked: (String) -> Unit) {
                     ) {
                         Text(text = symbol,
                             style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 24.sp
+                            fontSize = 27.sp
                             )
 
 
@@ -245,7 +245,8 @@ private fun PrintResult(symbol: String) {
         modifier = Modifier.padding(30.dp),
 
     ){
-        Text(text = "${symbol} ")
+        Text(text = "${symbol} ",
+            fontSize = 27.sp)
     }
 }
 
