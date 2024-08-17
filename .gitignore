@@ -1,5 +1,10 @@
 *.iml
+# Gradle files
 .gradle
+gradle.properties
+.gradle/
+build/
+local.properties
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -7,9 +12,35 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+
+# Android Studio files
+/.idea/
+*.iml
+
+# MacOS files
 .DS_Store
+
+
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# Keystore files
+*.jks
+*.keystore
+
+
+# User-specific files
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+
+# Miscellaneous
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.tmp

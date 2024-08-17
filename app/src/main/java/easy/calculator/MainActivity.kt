@@ -1,4 +1,4 @@
-package easy.calculator
+package easy.calculator.lb
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -40,16 +40,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Row (modifier = Modifier.padding(30.dp)) {
+                    //Row (modifier = Modifier.padding(30.dp)) {
 
-                    }
+                    //}
                     Column (
                         modifier = Modifier.padding(30.dp)
                     ) {
                         Welcome()
                         Calculate()
-
-
                     }
                 }
 
