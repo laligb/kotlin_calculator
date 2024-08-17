@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import easy.calculator.ui.theme.CalculatorTheme
 
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -184,7 +183,7 @@ private fun Calculate() {
 @Composable
 private fun CalculatorSymbols(clicked: (String) -> Unit) {
     var numbersAndSymbols = listOf(
-        listOf("C", "<-", "%", "/"),
+        listOf("C", "<", "%", "/"),
         listOf("7", "8", "9", "*"),
         listOf("4", "5", "6", "-"),
         listOf("1", "2", "3", "+"),
@@ -193,7 +192,6 @@ private fun CalculatorSymbols(clicked: (String) -> Unit) {
     Column {
         numbersAndSymbols.forEach { symbols ->
             Row (
-//                horizontalArrangement = Arrangement.SpaceEvenly,
 
             ) {
                 symbols.forEach { symbol ->
@@ -201,7 +199,7 @@ private fun CalculatorSymbols(clicked: (String) -> Unit) {
                         onClick = { clicked(symbol) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Magenta,
-                            contentColor = Color.Yellow
+                            contentColor = Color.White
                         ),
                         modifier = Modifier
                             .padding(5.dp)
@@ -212,7 +210,8 @@ private fun CalculatorSymbols(clicked: (String) -> Unit) {
                     ) {
                         Text(text = symbol,
                             style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 21.sp)
+                            fontSize = 24.sp
+                            )
 
 
                     }
